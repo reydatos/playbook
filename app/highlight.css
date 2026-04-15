@@ -1,0 +1,110 @@
+/* GitHub-style syntax highlighting for code blocks */
+.hljs {
+  color: #24292e;
+  background: #1e1e2e;
+}
+
+.prose pre {
+  background: #1e1e2e !important;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.prose pre code {
+  color: #e1e4e8 !important;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: #ff79c6;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: #a5d6ff;
+}
+
+.hljs-deletion,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-meta {
+  color: #ffa657;
+}
+
+.hljs-doctag {
+  color: #7ee787;
+}
+
+.hljs-attr,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-variable,
+.hljs-number {
+  color: #79c0ff;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* Inline code styling */
+.prose :not(pre) > code {
+  background-color: hsl(220, 14%, 94%);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* Table styling */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prose th {
+  background-color: hsl(220, 14%, 96%);
+  font-weight: 600;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid hsl(220, 13%, 91%);
+  padding: 0.5rem 0.75rem;
+}
+
+/* Checklist styling */
+.prose ul li input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+/* Blockquote */
+.prose blockquote {
+  border-left-color: hsl(220, 90%, 56%);
+  background-color: hsl(220, 90%, 56%, 0.05);
+  padding: 0.5rem 1rem;
+}
