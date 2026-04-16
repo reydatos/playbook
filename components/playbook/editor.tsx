@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
@@ -13,22 +13,63 @@ import {
 } from "@codemirror/language";
 import { lineNumbers, highlightActiveLine } from "@codemirror/view";
 
+export interface MarkdownEditorHandle {
+  insertText: (text: string) => void;
+  getSelection: () => string;
+  replaceSelection: (text: string) => void;
+}
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
+  onSelectionChange?: (selection: string) => void;
   readOnly?: boolean;
 }
 
-export function MarkdownEditor({
-  value,
-  onChange,
-  readOnly = false,
-}: MarkdownEditorProps) {
+export const MarkdownEditor = forwardRef<
+  MarkdownEditorHandle,
+  MarkdownEditorProps
+>(function MarkdownEditor(
+  { value, onChange, onSelectionChange, readOnly = false },
+  ref
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
+  const onSelectionRef = useRef(onSelectionChange);
+  onSelectionRef.current = onSelectionChange;
+
+  useImperativeHandle(ref, () => ({
+    insertText(text: string) {
+      const view = viewRef.current;
+      if (!view) return;
+      const { from } = view.state.selection.main;
+      view.dispatch({
+        changes: { from, to: from, insert: text },
+        selection: { anchor: from + text.length },
+      });
+      view.focus();
+    },
+    getSelection() {
+      const view = viewRef.current;
+      if (!view) return "";
+      const { from, to } = view.state.selection.main;
+      return view.state.sliceDoc(from, to);
+    },
+    replaceSelection(text: string) {
+      const view = viewRef.current;
+      if (!view) return;
+      const { from, to } = view.state.selection.main;
+      view.dispatch({
+        changes: { from, to, insert: text },
+        selection: { anchor: from + text.length },
+      });
+      view.focus();
+    },
+  }));
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -36,6 +77,11 @@ export function MarkdownEditor({
     const updateListener = EditorView.updateListener.of((update) => {
       if (update.docChanged) {
         onChangeRef.current(update.state.doc.toString());
+      }
+      if (update.selectionSet && onSelectionRef.current) {
+        const { from, to } = update.state.selection.main;
+        const selected = update.state.sliceDoc(from, to);
+        onSelectionRef.current(selected);
       }
     });
 
@@ -98,7 +144,6 @@ export function MarkdownEditor({
       view.destroy();
       viewRef.current = null;
     };
-    // Only run on mount/unmount — value sync handled below
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readOnly]);
 
@@ -124,23 +169,4 @@ export function MarkdownEditor({
       className="h-full overflow-hidden rounded-md border bg-white"
     />
   );
-}
-
-// Helper to insert text at cursor in the editor
-export function insertAtCursor(
-  view: EditorView,
-  before: string,
-  after: string = ""
-) {
-  const { from, to } = view.state.selection.main;
-  const selected = view.state.sliceDoc(from, to);
-  const insert = `${before}${selected}${after}`;
-  view.dispatch({
-    changes: { from, to, insert },
-    selection: {
-      anchor: from + before.length,
-      head: from + before.length + selected.length,
-    },
-  });
-  view.focus();
-}
+});

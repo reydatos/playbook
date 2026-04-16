@@ -107,6 +107,7 @@ export interface ImportRequest {
   sourceId?: string;
   extractVariables?: boolean;
   autoStructure?: boolean;
+  aiEnhance?: boolean;
 }
 
 export interface ImportResult {
@@ -134,6 +135,63 @@ export interface ImportMetadata {
   codeBlockCount: number;
   tableCount: number;
   importedAt: string;
+}
+
+// --- AI Authoring ---
+
+export type AIAction =
+  | "structure"
+  | "generate"
+  | "improve"
+  | "troubleshoot"
+  | "detect-issues"
+  | "summarize";
+
+export interface AIStructureRequest {
+  content: string;
+  context?: string;
+  industry?: string;
+}
+
+export interface AIStructureResult {
+  structured: string;
+  detectedVariables: TemplateVariable[];
+  sections: ContentSection[];
+}
+
+export interface AIGenerateRequest {
+  prompt: string;
+  context?: string;
+  industry?: string;
+  category?: string;
+  includeVariables?: boolean;
+}
+
+export interface AIGenerateResult {
+  content: string;
+  title: string;
+  description: string;
+  detectedVariables: TemplateVariable[];
+  sections: ContentSection[];
+}
+
+export interface AIAssistRequest {
+  action: AIAction;
+  content: string;
+  selection?: string;
+  context?: string;
+}
+
+export interface AIAssistResult {
+  result: string;
+  action: AIAction;
+}
+
+export interface VoiceTranscriptState {
+  isListening: boolean;
+  transcript: string;
+  interimTranscript: string;
+  error: string | null;
 }
 
 // --- API Response Types ---

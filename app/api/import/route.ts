@@ -11,6 +11,8 @@ import {
   structureContent,
   htmlToMarkdown,
 } from "@/lib/parsers/content-parser";
+import { getClient, isAIAvailable, AI_MODEL, MAX_TOKENS } from "@/lib/ai/client";
+import { getImportEnhancePrompt } from "@/lib/ai/prompts";
 
 /**
  * POST /api/import
@@ -105,6 +107,26 @@ export async function POST(request: NextRequest) {
     }
   }
   // "markdown" format: use as-is
+
+  // AI-enhanced structuring
+  if (body.aiEnhance && isAIAvailable()) {
+    const client = getClient()!;
+    try {
+      const message = await client.messages.create({
+        model: AI_MODEL,
+        max_tokens: MAX_TOKENS,
+        system: getImportEnhancePrompt(),
+        messages: [{ role: "user", content: markdownContent }],
+      });
+      const textBlock = message.content.find((b) => b.type === "text");
+      if (textBlock) {
+        markdownContent = textBlock.text;
+      }
+    } catch (err) {
+      // Fall back to non-AI version silently
+      console.error("AI import enhancement failed, using standard parse:", err);
+    }
+  }
 
   // Detect title from first heading if not provided
   let title = body.title || "";
